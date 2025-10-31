@@ -21,8 +21,7 @@ def fetch_pypi_package(package_name):
                 'version': '0.0.0',
                 'summary': 'Package not found',
                 'is_valid': False,
-                'not_found': True,
-                'project_url': f'https://pypi.org/project/{package_name}/'
+                'not_found': True
             }
         
         response.raise_for_status()
@@ -33,39 +32,33 @@ def fetch_pypi_package(package_name):
             'name': info['name'],
             'version': info.get('version', '0.0.0'),
             'summary': info.get('summary', 'No summary'),
-            'description': info.get('description', ''),
-            'license': info.get('license', 'Not specified'),
-            'home_page': info.get('home_page', ''),
-            'project_url': info.get('project_url', f'https://pypi.org/project/{info["name"]}/'),
             'is_valid': True
         }
         
     except Exception as e:
         return {
             'name': package_name,
-            'version': '0.0.0',
+            'version': '0.0.0', 
             'summary': f'Error: {str(e)}',
             'is_valid': False,
-            'error': True,
-            'project_url': f'https://pypi.org/project/{package_name}/'
+            'error': True
         }
 
 def fetch_all_packages():
-    print("📦 Fetching PyPI packages...")
+    print("🚀 Starting PyPI packages fetch...")
     
     packages = []
     for package_name in PYPI_PACKAGES:
         package_data = fetch_pypi_package(package_name)
         packages.append(package_data)
     
-    # Сортируем: валидные первые
     sorted_packages = sorted(packages, key=lambda x: (not x.get('is_valid', False), x['name']))
     
     with open('pypi_packages.json', 'w', encoding='utf-8') as f:
         json.dump(sorted_packages, f, indent=2, ensure_ascii=False)
     
     valid_count = sum(1 for pkg in packages if pkg.get('is_valid'))
-    print(f"✅ Fetched {valid_count} valid PyPI packages out of {len(packages)}")
+    print(f"✅ SUCCESS: {valid_count} valid packages out of {len(packages)}")
 
 if __name__ == "__main__":
     fetch_all_packages()
