@@ -10,11 +10,11 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Checkout main branch
+      - name: Checkout master branch
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.PAT }}
-          ref: main
+          ref: master
 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -23,9 +23,6 @@ jobs:
 
       - name: Install requests
         run: pip install requests
-
-      - name: Create data directory
-        run: mkdir -p scripts
 
       - name: Fetch GitHub repositories
         run: python scripts/fetch_github.py
@@ -39,56 +36,16 @@ jobs:
       - name: Fetch Zenodo stats
         run: python scripts/fetch_zenodo.py
 
-      - name: Show file sizes
+      - name: Show results
         run: |
           echo "📁 Generated files:"
           ls -la *.json
-          echo ""
-          echo "📊 File sizes:"
-          wc -c *.json
-
-      - name: Show usage statistics
-        run: |
-          echo "=== 📈 USAGE STATISTICS ==="
-          echo "🏃 Workflow runs per day: 24"
-          echo "⏱️ Estimated time: 48 minutes/day"
-          echo ""
-          echo "🌐 API calls per day:"
-          echo "  - GitHub: 24 calls"
-          echo "  - PyPI: 552 calls (24 × 23 packages)"
-          echo "  - Dev.to: 24 calls" 
-          echo "  - Zenodo: 72 calls (24 × 3 records)"
-          echo "  📊 TOTAL: 672 API calls/day"
-          echo ""
-          echo "💾 Storage usage:"
-          echo "  - 4 JSON files updated hourly"
-          echo "  - Minimal disk space"
-          echo ""
-          echo "✅ STATUS: WELL WITHIN GITHUB LIMITS"
-          echo "====================================="
+          echo "🔥 SUCCESS! All data fetched!"
 
       - name: Commit and push updates
         run: |
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@users.noreply.github.com"
           git add *.json
-          if git diff --staged --quiet; then
-            echo "🎉 No data changes - everything up to date!"
-          else
-            git commit -m "🚀 Data update: $(date -Iminutes)"
-            git push origin main
-            echo "🔥 Data successfully updated and pushed!"
-          fi
-
-      - name: Final success message
-        run: |
-          echo ""
-          echo "#############################################"
-          echo "🎉 WEBSITE DATA UPDATE COMPLETE!"
-          echo "📅 Next update: 1 hour"
-          echo "🌐 JSON files ready for websites:"
-          echo "   - github_repos.json"
-          echo "   - pypi_packages.json" 
-          echo "   - devto_articles.json"
-          echo "   - zenodo_stats.json"
-          echo "#############################################"
+          git commit -m "🚀 Data update: $(date -Iminutes)" || echo "🤷 No changes"
+          git push origin master
