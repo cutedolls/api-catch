@@ -1,11 +1,13 @@
 import requests
 import json
-
-GITHUB_USERNAME = "smartlegionlab"
-EXCLUDED_REPOS = ["smartlegionlab"]
+from datetime import datetime
 
 def fetch_github_repos():
-    print("📡 Fetching GitHub repositories...")
+    print("🚀 Starting GitHub repositories fetch...")
+    print("📡 Connecting to GitHub API...")
+    
+    GITHUB_USERNAME = "smartlegionlab"
+    EXCLUDED_REPOS = ["smartlegionlab"]
     
     url = f"https://api.github.com/users/{GITHUB_USERNAME}/repos?sort=updated&per_page=100"
     response = requests.get(url)
@@ -13,7 +15,6 @@ def fetch_github_repos():
     
     repos = response.json()
     
-    # Фильтруем и сортируем
     filtered_repos = [
         repo for repo in repos 
         if not repo['archived'] and repo['name'] not in EXCLUDED_REPOS
@@ -21,11 +22,14 @@ def fetch_github_repos():
     
     sorted_repos = sorted(filtered_repos, key=lambda x: x['pushed_at'], reverse=True)
     
-    # Сохраняем в корень
     with open('github_repos.json', 'w', encoding='utf-8') as f:
         json.dump(sorted_repos, f, indent=2, ensure_ascii=False)
     
-    print(f"✅ Fetched {len(sorted_repos)} GitHub repositories")
+    print(f"✅ SUCCESS: Fetched {len(sorted_repos)} active repositories")
+    print(f"⭐ Total stars: {sum(repo['stargazers_count'] for repo in sorted_repos)}")
+    print(f"🍴 Total forks: {sum(repo['forks_count'] for repo in sorted_repos)}")
+    print(f"💾 Saved to: github_repos.json")
+    print("")
 
 if __name__ == "__main__":
     fetch_github_repos()
